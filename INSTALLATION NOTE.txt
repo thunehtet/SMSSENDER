@@ -1,0 +1,17 @@
+﻿[Pre-requisite :: Update the full path name of .exe in -BinaryPathName]
+[STEP 1 :: OPEN POWER SHELL AS ADMINISTRATOR]
+[STEP 2 :: RUN THE BELOW COMMAND]
+
+
+New-Service -Name "PGS_SMS_SENDER" -BinaryPathName "C:\Users\GLOBOTRON\Desktop\UDPFORWARDER" -DisplayName "PGS_SMS_SENDER" -Description "PGS SMS SENDER "
+
+Get-Service -DisplayName "PGS_SMS_SENDER" | Remove-Service
+Remove-Service -Name "PGS_SMS_SENDER"
+
+//If power shell is not working then use cmd with administrator 
+
+SC DELETE PGS_SMS_SENDER
+
+
+//CREATE WITH CMD
+sc.exe create UDPService binPath= "C:\Users\GLOBOTRON\Desktop\UDPFORWARDER.exe"

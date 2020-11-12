@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "PGSSMSSERVICE": {
+      "commandName": "Project",
+      "workingDirectory": "D:\\001.TT241\\03.SOURCE CODE\\LTA_PGS\\CCS\\SMSSENDER"
+    }
+  }
+}

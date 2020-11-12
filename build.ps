@@ -1,0 +1,5 @@
+dotnet restore
+dotnet publish -c Release -o ./publish/UdpForwarder
+
+
+New-Service -Name "LTA_PGS_UDP_FORWARDER" -BinaryPathName "C:\LTAPGS\PGSSMSSERVICE\PGSSMSSERVICE.exe " -DisplayName "LTA_PGS_UDP_FORWARDER" -Description "PGS UDP FORWARDER:: Carpark Lot data forwarder "
