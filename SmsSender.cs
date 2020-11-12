@@ -12,16 +12,17 @@ namespace SMSSENDER
 {
     public class SmsSender
     {
-        int baudRate { get; set; }
-        int listenerPort { get; set; }
-        string comPort { get; set; }
+        private int baudRate { get; set; }
+        private int listenerPort { get; set; }
+        private string comPort { get; set; }
+
         public SmsSender(int ListenerPort, int BaudRate, string ComPort)
         {
             baudRate = BaudRate;
             listenerPort = ListenerPort;
             comPort = ComPort;
-
         }
+
         public int DefaultDatRetention { get; set; } = 720;
 
         public async Task StartProcess()
@@ -37,7 +38,6 @@ namespace SMSSENDER
                     string incomeMessage = $" {Encoding.ASCII.GetString(bytes, 0, bytes.Length)}";
                     await SendSms(baudRate, comPort, incomeMessage);
                     await WriteLog("[RECEIVE] [IP :" + groupEP.Address + "][PORT :" + groupEP.Port + "][ Message :" + $" {Encoding.ASCII.GetString(bytes, 0, bytes.Length)}" + " ]");
-                    
                 }
             }
             catch (SocketException e)
@@ -50,13 +50,10 @@ namespace SMSSENDER
             }
         }
 
-      
-
-        private async Task SendSms(int BaudRate, string ComPort,string Message)
+        private async Task SendSms(int BaudRate, string ComPort, string Message)
         {
             try
             {
-
                 //"<OTP-" + Otp + ">|" + MobileNo + "|" + (smsDB.NoOfSms + 1));
                 //"<OTP-12345>|12345678|1";
                 string[] splitMessage = Message.Split("|");
@@ -87,23 +84,19 @@ namespace SMSSENDER
                     }
                     catch (Exception ex)
                     {
-                        await WriteSmsSend("[ SEND SMS ] [ ERROR ] " + ex.Message  );
+                        await WriteSmsSend("[ SEND SMS ] [ ERROR ] " + ex.Message);
                     }
-
                 }
                 else
                 {
-                    await WriteLog("[ RECEIVE ]MESSAGE DISCARD-DO NOT NOT COMFORM FORMAT ::" + Message);
-
+                    await WriteLog("[ RECEIVE ][ MESSAGE DISCARD ] DO NOT NOT COMFORM FORMAT ::" + Message);
                 }
-
             }
             catch (Exception e)
             {
-                await WriteLog("[ SEND SMS ] [ ERROR ] "+e.Message);
+                await WriteLog("[ SEND SMS ] [ ERROR ] " + e.Message);
             }
         }
-
 
         public Task WriteLog(string logMessage)
         {
@@ -119,7 +112,7 @@ namespace SMSSENDER
 
         private Task Log(string logName, string logMessage, int DataRetention)
         {
-          try
+            try
             {
                 string orPath = Path.GetDirectoryName(Environment.CurrentDirectory) + @"\SMSLOG";
                 string subDirecory = orPath + @"\" + logName;

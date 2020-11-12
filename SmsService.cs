@@ -1,5 +1,4 @@
-﻿
-using Microsoft.Extensions.Configuration;
+﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using System;
@@ -23,19 +22,17 @@ namespace SMSSENDER
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-
                 int baudRate = getBaudRate();
                 string comPort = getComPort();
                 int listenPort = messageListenerPort();
-                SmsSender sms = new SmsSender(listenPort,baudRate,comPort);
+                SmsSender sms = new SmsSender(listenPort, baudRate, comPort);
                 await sms.StartProcess();
-                
             }
         }
 
         private string getComPort()
         {
-            string com= _configuration.GetSection("SmsGateway").GetSection("COM").Value;
+            string com = _configuration.GetSection("SmsGateway").GetSection("COM").Value;
             return com;
         }
 
@@ -45,7 +42,7 @@ namespace SMSSENDER
         }
 
         private int messageListenerPort()
-        { 
+        {
             return Convert.ToInt32(_configuration.GetSection("Message").GetSection("ListenPort").Value);
         }
     }
