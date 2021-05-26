@@ -37,7 +37,7 @@ namespace SMSSENDER
                     byte[] bytes = listener.Receive(ref groupEP);
                     string incomeMessage = $" {Encoding.ASCII.GetString(bytes, 0, bytes.Length)}";
                     await SendSms(baudRate, comPort, incomeMessage);
-                    await WriteLog("[RECEIVE] [IP :" + groupEP.Address + "][PORT :" + groupEP.Port + "][ Message :" + $" {Encoding.ASCII.GetString(bytes, 0, bytes.Length)}" + " ]");
+                    await WriteLog("[RECEIVE] [IP :" + groupEP.Address + "][PORT :" + groupEP.Port + "][ Message ] [ " + $" {Encoding.ASCII.GetString(bytes, 0, bytes.Length)}" + " ]");
                 }
             }
             catch (SocketException e)
@@ -59,6 +59,13 @@ namespace SMSSENDER
                 string[] splitMessage = Message.Split("|");
                 string pattern = @"<OTP-(?<OTPNO>\d.*)>$";
                 var match = Regex.Match(splitMessage[0], pattern);
+
+
+                //<"ALM-"+status,deviceID,alarmname+ ">|" + MobileNo + "|" + (smsDB.NoOfSms + 1));
+                //<ALM-1,VMS_NICOLLHIGHWAY ,HighTempAlarm>|12345678|1"
+
+                string ptnAlm = @"<ALM-(?<ALARMINFO>\w+.*)>$";
+                var matchAlm = Regex.Match(splitMessage[0], ptnAlm);
                 if (match.Success)
                 {
                     string otpNo = match.Groups["OTPNO"].ToString();
@@ -76,7 +83,7 @@ namespace SMSSENDER
                         Thread.Sleep(200);
                         serialPort.WriteLine(@"AT+CMGS=""" + moblieNo + @"""" + (char)(13));
                         Thread.Sleep(200);
-                        string smsMessage = "Your OTP is < " + otpNo + " >for your LTA PGS system log in account. #" + smsSerialNo + (char)(26);
+                        string smsMessage = "Your OTP is < " + otpNo + " >for your LTA PGS system log in account. #SMSCOUNT" + smsSerialNo + (char)(26);
                         serialPort.WriteLine(smsMessage);
                         Thread.Sleep(200);
                         serialPort.Close();
@@ -86,6 +93,60 @@ namespace SMSSENDER
                     {
                         await WriteSmsSend("[ SEND SMS ] [ ERROR ] " + ex.Message);
                     }
+                }
+                else if (matchAlm.Success)
+                {
+                    string[] type = matchAlm.Groups["ALARMINFO"].ToString().Split(","); //status , alarm name // 1=>ALARM ACTIVATED ,0=>ALARM CLEARED
+                    string moblieNo = splitMessage[1];
+                    string smsSerialNo = splitMessage[2];
+
+                    using SerialPort serialPort = new SerialPort(ComPort, BaudRate, Parity.None, 8, StopBits.One);
+
+                    try
+                    {
+                        
+                        if (type[0] == "1")
+                        {
+                            serialPort.Open();
+                            serialPort.WriteLine(@"AT" + (char)(13));
+                            Thread.Sleep(200);
+                            serialPort.WriteLine("AT+CMGF=1" + (char)(13));
+                            Thread.Sleep(200);
+                            serialPort.WriteLine(@"AT+CMGS=""" + moblieNo + @"""" + (char)(13));
+                            Thread.Sleep(200);
+                            string smsMessage = "#ALARM-DETECT#PGS/" + type[1].ToUpper()+"/"+ type[2].ToUpper()+"/" +DateTime.Now.ToString("")+ "#SMSCOUNT" + smsSerialNo + (char)(26);
+                            serialPort.WriteLine(smsMessage);
+                            Thread.Sleep(200);
+                            serialPort.Close();
+                            await WriteSmsSend("[ SEND SMS ] [SUCCESS ] [Mobile No :" + moblieNo + "][Message :" + smsMessage + "]");
+                        }
+                        if (type[0] == "0")
+                        {
+                            serialPort.Open();
+                            serialPort.WriteLine(@"AT" + (char)(13));
+                            Thread.Sleep(200);
+                            serialPort.WriteLine("AT+CMGF=1" + (char)(13));
+                            Thread.Sleep(200);
+                            serialPort.WriteLine(@"AT+CMGS=""" + moblieNo + @"""" + (char)(13));
+                            Thread.Sleep(200);
+                            string smsMessage = "#ALARM-CLEAR#PGS/" + type[1].ToUpper() + "/" + type[2].ToUpper() + "/" + DateTime.Now.ToString("") + "#SMSCOUNT" + smsSerialNo + (char)(26);
+                            serialPort.WriteLine(smsMessage);
+                            Thread.Sleep(200);
+                            serialPort.Close();
+                            await WriteSmsSend("[ SEND SMS ] [SUCCESS ] [Mobile No :" + moblieNo + "][Message :" + smsMessage + "]");
+                        }
+                        else
+                        {
+                            await WriteSmsSend("[ SEND SMS ] [ INVALID DATA ] ");
+                        }
+
+
+                    }
+                    catch (Exception ex)
+                    {
+                        await WriteSmsSend("[ SEND SMS ] [ ERROR ] " + ex.Message);
+                    }
+
                 }
                 else
                 {
