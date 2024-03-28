@@ -25,7 +25,8 @@ namespace SMSSENDER
                 int baudRate = getBaudRate();
                 string comPort = getComPort();
                 int listenPort = messageListenerPort();
-                SmsSender sms = new SmsSender(listenPort, baudRate, comPort);
+                int queueInterval = getQueueInterval();
+                SmsSender sms = new SmsSender(listenPort, baudRate, comPort,queueInterval);
                 await sms.StartProcess();
             }
         }
@@ -39,6 +40,11 @@ namespace SMSSENDER
         private int getBaudRate()
         {
             return Convert.ToInt32(_configuration.GetSection("SmsGateway").GetSection("BaudRate").Value);
+        }
+        private int getQueueInterval()
+        {
+            int queueInverval= Convert.ToInt32(_configuration.GetSection("SmsGateway").GetSection("QueueInterval").Value);
+            return queueInverval;
         }
 
         private int messageListenerPort()

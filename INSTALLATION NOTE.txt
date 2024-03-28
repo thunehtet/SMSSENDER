@@ -3,7 +3,7 @@
 [STEP 2 :: RUN THE BELOW COMMAND]
 
 
-New-Service -Name "PGS_SMS_SENDER" -BinaryPathName "C:\Users\GLOBOTRON\Desktop\UDPFORWARDER" -DisplayName "PGS_SMS_SENDER" -Description "PGS SMS SENDER "
+New-Service -Name "PGS_SMS_SENDER" -BinaryPathName "C:\LDC\SMSSENDER\SMSSENDER.exe" -DisplayName "PGS_SMS_SENDER" -Description "PGS SMS SENDER "
 
 Get-Service -DisplayName "PGS_SMS_SENDER" | Remove-Service
 Remove-Service -Name "PGS_SMS_SENDER"
